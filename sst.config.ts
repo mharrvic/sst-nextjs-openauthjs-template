@@ -18,11 +18,15 @@ export default $config({
     const vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "ec2" });
     const rds = new sst.aws.Postgres("MyPostgres", { vpc, proxy: true });
 
+    const auth = new sst.aws.Auth("MyAuth", {
+      authorizer: "src/infra/lambda/auth.handler",
+    });
+
     const bucket = new sst.aws.Bucket("MyBucket", {
       access: "public",
     });
     new sst.aws.Nextjs("MyWeb", {
-      link: [bucket, rds],
+      link: [bucket, rds, auth],
     });
 
     new sst.x.DevCommand("Studio", {
