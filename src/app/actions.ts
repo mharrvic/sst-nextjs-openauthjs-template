@@ -1,8 +1,9 @@
 "use server";
 
-import { cookies as getCookies, headers as getHeaders } from "next/headers";
+import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { client, setTokens, subjects } from "./auth";
+import { Resource } from "sst";
+import { setTokens } from "./auth";
 
 export async function auth() {
   const cookies = await getCookies();
@@ -14,63 +15,66 @@ export async function auth() {
     return false;
   }
 
-  const subjects = {
-    user: {
-      "~standard": {
-        validate: (properties: { id?: string }) => {
-          if (typeof properties.id === "string") {
-            console.log("Validated properties:", properties);
-            return { issues: null, value: properties };
-          }
-          console.error("Invalid properties:", properties);
-          return { issues: "Invalid properties" };
-        },
-      },
+  const response = await fetch(`${Resource.LambdaAuthApi.url}verify`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "x-access-token": accessToken?.value || "",
+      "x-refresh-token": refreshToken?.value || "",
     },
-  };
-  // @ts-expect-error - Overriding the default subjects
-  const verified = await client.verify(subjects, accessToken.value, {
-    refresh: refreshToken?.value,
+    credentials: "include",
   });
 
-  console.log("Verification result:", verified);
+  const responseJson = (await response.json()) as {
+    subject?: {
+      type: string;
+      properties: {
+        id: string;
+      };
+    };
+    tokens?: {
+      access: string;
+      refresh: string;
+    };
+    error?: string;
+  };
 
-  if (verified.err) {
-    console.error("Verification failed with error:", verified.err);
+  if (response.status === 400) {
+    console.error("Verification failed with error:", responseJson.error);
     return false;
   }
 
-  if (verified.tokens) {
-    console.log("Setting new tokens:", verified.tokens);
-    await setTokens(verified.tokens.access, verified.tokens.refresh);
+  if (responseJson.tokens) {
+    console.log("Setting new tokens:", responseJson.tokens);
+    await setTokens(responseJson.tokens.access, responseJson.tokens.refresh);
   }
 
-  return verified.subject;
+  return responseJson.subject;
 }
 
 export async function login() {
-  const cookies = await getCookies();
-  const accessToken = cookies.get("access_token");
-  const refreshToken = cookies.get("refresh_token");
+  const lambdaUrl = Resource.LambdaAuthApi.url;
 
-  if (accessToken) {
-    const verified = await client.verify(subjects, accessToken.value, {
-      refresh: refreshToken?.value,
-    });
-    if (!verified.err && verified.tokens) {
-      await setTokens(verified.tokens.access, verified.tokens.refresh);
-      redirect("/");
-    }
+  const response = await fetch(`${lambdaUrl}authorize`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+
+  console.log({ response });
+
+  const { url } = await response.json();
+
+  console.log("Received data from /authorize:", url);
+
+  console.log({ url });
+  if (url) {
+    redirect(url);
+  } else {
+    console.error("Unexpected response from /authorize:", url);
   }
-
-  const headers = await getHeaders();
-  const host = headers.get("host");
-  const protocol = host?.includes("localhost") ? "http" : "https";
-  const { url } = await client.authorize(
-    `${protocol}://${host}/api/callback`,
-    "code"
-  );
-  redirect(url);
 }
 
 export async function logout() {
