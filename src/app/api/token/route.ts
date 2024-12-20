@@ -7,7 +7,6 @@ export async function GET(req: NextRequest) {
 
     const accessToken = url.searchParams.get("access_token") ?? "";
     const refreshToken = url.searchParams.get("refresh_token") ?? "";
-    console.log({ accessToken, refreshToken });
 
     await setTokens(accessToken, refreshToken);
     return NextResponse.redirect(`${url.origin}/`);

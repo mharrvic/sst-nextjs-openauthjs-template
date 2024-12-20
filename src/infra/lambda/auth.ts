@@ -42,8 +42,6 @@ const getItemByPkAndSk = async (email: string) => {
   const pkValue = `email\x1F${email}`;
   const skValue = "subject";
 
-  console.log(`Getting item with pk: "${pkValue}" and sk: "${skValue}"`);
-
   try {
     const response = await client.send(
       new GetItemCommand({
@@ -119,7 +117,6 @@ const app = authorizer({
   },
   success: async (ctx, value) => {
     if (value.provider === "password") {
-      console.log({ value });
       await saveUser(value.email);
       // @ts-expect-error - Overriding the default subjects
       return ctx.subject("user", {

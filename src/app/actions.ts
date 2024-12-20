@@ -63,13 +63,8 @@ export async function login() {
     credentials: "include",
   });
 
-  console.log({ response });
-
   const { url } = await response.json();
 
-  console.log("Received data from /authorize:", url);
-
-  console.log({ url });
   if (url) {
     redirect(url);
   } else {

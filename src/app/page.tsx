@@ -17,8 +17,6 @@ export default async function Home() {
   });
   const url = await getSignedUrl(new S3Client({}), command);
 
-  console.log({ subject });
-
   return (
     <div className="m-2">
       <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
