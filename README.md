@@ -1,38 +1,24 @@
-## Mac Support
+## SST - Next.js - OpenAuthJS Template
 
-AI + Human Customer Support
+SST - https://sst.dev
+OpenAuthJs - http://openauth.js.org
+NextJS - https://nextjs.org
 
 ## Getting Started
 
-First, run the development server:
+Prerequisite: Follow this instruction to setup your AWS account https://sst.dev/docs/aws-accounts/
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Authenticate with AWS sso `npm run sso` (modify the sso session)
+2. Install the dependencies `npm install`
+3. Deploy the stack `npm run sst-dev`
+4. On a new terminal, run the database migration `npm run db migrate`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Why build this template?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Just to make it easier to start a new project with SST, Next.js and OpenAuthJS. Took me a week to figure out how to make it work together because of the AWS, SST, and OpenAuthJs setup. So I decided to make a template for it.
 
-## Learn More
+OpenAuthJs has potential to be a great library for authentication, but it's not well documented yet and the setup is a bit tricky if you want to go with not using the SST Auth component (like i did, since i have to set a custom link --postgres with vpc-- and permission to the lambda).
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For now, i might just use https://authjs.dev + neon db + drizzle + nextjs. But i'll keep an eye on OpenAuthJs.
