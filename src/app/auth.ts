@@ -5,7 +5,7 @@ export { subjects } from "~/auth/subjects";
 
 export const client = createClient({
   clientID: "mac-support",
-  issuer: Resource.MyAuth.url,
+  issuer: Resource.LambdaAuth.url,
 });
 
 export async function setTokens(access: string, refresh: string) {
