@@ -6,9 +6,19 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "MyAuth": {
-      "type": "sst.aws.Auth"
+    "LambdaAuth": {
+      "name": string
+      "type": "sst.aws.Function"
       "url": string
+    }
+    "LambdaAuthApi": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "LambdaAuthTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
     }
     "MyBucket": {
       "name": string

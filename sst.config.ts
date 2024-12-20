@@ -18,15 +18,37 @@ export default $config({
     const vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "ec2" });
     const rds = new sst.aws.Postgres("MyPostgres", { vpc, proxy: true });
 
-    const auth = new sst.aws.Auth("MyAuth", {
-      authorizer: "src/infra/lambda/auth.handler",
+    const table = new sst.aws.Dynamo("LambdaAuthTable", {
+      fields: {
+        pk: "string",
+        sk: "string",
+      },
+      ttl: "expiry",
+      primaryIndex: {
+        hashKey: "pk",
+        rangeKey: "sk",
+      },
+    });
+    const lambdaAuth = new sst.aws.Function("LambdaAuth", {
+      vpc,
+      handler: "src/infra/lambda/auth.handler",
+      url: true,
+      link: [table, rds],
+    });
+
+    const lambdaAuthApi = new sst.aws.Function("LambdaAuthApi", {
+      handler: "src/infra/lambda/auth-api.handler",
+      url: true,
+      environment: {
+        OPENAUTH_ISSUER: lambdaAuth.url.apply((v) => v!.replace(/\/$/, "")),
+      },
     });
 
     const bucket = new sst.aws.Bucket("MyBucket", {
       access: "public",
     });
     new sst.aws.Nextjs("MyWeb", {
-      link: [bucket, rds, auth],
+      link: [bucket, rds, lambdaAuth, lambdaAuthApi],
     });
 
     new sst.x.DevCommand("Studio", {
